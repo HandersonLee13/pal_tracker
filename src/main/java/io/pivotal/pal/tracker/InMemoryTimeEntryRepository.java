@@ -4,21 +4,17 @@ import org.springframework.context.annotation.Bean;
 
 import java.sql.Time;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class InMemoryTimeEntryRepository implements TimeEntryRepository {
 
-    private HashMap<Long, TimeEntry> timeEntryHashMap;
-    private long currentId = 1L;
-
-    public InMemoryTimeEntryRepository() {
-        timeEntryHashMap = new HashMap<Long, TimeEntry>();
-    }
+    private Map<Long, TimeEntry> timeEntryHashMap = new ConcurrentHashMap<>();
+    private AtomicLong currentId = new AtomicLong(1);
 
     public TimeEntry create(TimeEntry timeEntry) {
-        timeEntry.setId(currentId);
-        timeEntryHashMap.put(currentId, timeEntry);
-
-        currentId++;
+        timeEntry.setId(currentId.getAndIncrement());
+        timeEntryHashMap.put(timeEntry.getId(), timeEntry);
 
         return timeEntry;
     }
